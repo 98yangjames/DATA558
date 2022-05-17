@@ -1,0 +1,113 @@
+
+
+### Generate data ###
+y <- rnorm(100)
+x <- matrix(rnorm(10000*100), ncol = 10000)
+error <- rnorm(100, mean = 0, sd = 1)
+#####################
+
+#####Predict Model with F(x) = 0 #####
+model_1a <- lm(y~x)
+zeros <- rep(0, 100)
+# matrix_of_zeros <- data.frame(matrix(0, nrow = 1, 100))
+# model_1d <- data.frame(predict(model_1a, newdata=matrix_of_zeros))
+
+####Bias Function ####
+get_bias = function(estimate, truth) {
+  return (mean(estimate) - truth)
+  
+}
+#### Get bias with estimate as all 0s and model predicts ####
+#1c(i)
+bias <- get_bias(zeros, y) 
+bias <- sum(bias)/100
+
+#1c(ii)
+variance <- var(y)
+
+#1c (iii) Test MSE = E((y -f(x))^2) 
+EPE <- sum((y)^2)/100
+
+# 1c(iv)
+testing <- y[80:100]
+EPE_validation <- sum(testing^2)/20
+
+#1d
+training <- y[0:80]
+model_1d <- lm(y[0:80] ~ training)
+testing_predicted <- predict(model_1d, newdata = data.frame(testing))
+EPE_1d <- sum((testing_predicted - training)^2) / 20
+
+################## Q2
+
+#2a
+corr_op1 <- abs(cor(x, y))
+hist(corr_op1)
+
+#2b
+model_2 <- lm(y[1:10]~training[1:10], drop.unused.levels = TRUE)
+model_2option1 <- predict(model_2, newdata = data.frame(training[1:10]))
+EPE_2b <- sum((model_2option1 - testing[1:10])^2)/10
+
+#2c 
+indexIncreasing <- order(corr_op1, decreasing = TRUE)
+largest10Q <- c()
+for(i in 1:10) {
+  largest10Q <- append(largest10Q, x[indexIncreasing[i]])
+}
+model_2c <- lm(y[1:10] ~ largest10Q, drop.unused.levels = TRUE)
+model_2option2 <- predict(model_2c, newdata = data.frame(largest10Q))
+EPE_2c <- sum((model_2option2 - testing[1:10])^2)/10
+
+
+
+################ Q3
+
+#3b
+df_3 <- read.csv("features.csv")
+model_3b <- lm(df_3$totalWordsCount ~ ., data = df_3)
+x <- df_3 %>% select(4:62)
+correlations <- abs(cor(x, df_3$totalWordsCount))
+index <- order(correlations, decreasing = TRUE)
+largest <- c()
+for (i in 1:300) {
+  largest <- append(largest, x[index[i]])
+}
+training3b <- df_3$totalWordsCount[1:700]
+testing3b <- df_3$totalWordsCount[700:1000]
+
+
+model_3bLargest <- lm(training3b ~ ., data=largest, drop.unused.levels = TRUE)
+model_3boption2 <- predict(model_3bLargest, newdata = data.frame(largest))
+EPE_3b <- sum((model_3boption2[700:1000] - testing3b)^2)/300
+
+#3c
+library(glmnet)
+lambdas = c(0.01, 1, 10)
+ridge3c <- glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 0, lambda = lambdas)
+plot(ridge3c, xvar = "lambda", xlab="Lambda")
+
+#3d
+ridge3c <- cv.glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 0)
+best_lambda <- ridge3c$lambda.min
+ridge3d <- glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 0, lambda = 52.307)
+model_3d <- predict(ridge3d, newdata = data.frame(training), newx = data.matrix(x))
+EPE_3d <- sum((model_3d[700:1000]-testing3b)^2)/300
+
+
+#3e
+lambdas = c(0.01, 1, 10)
+lasso3e <- glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 1, lambda = lambdas)
+plot(lasso3e, xvar = "lambda", xlab="Lambda")
+
+#3f
+
+lasso3f <- cv.glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 1)
+best_lambda_3f <- lasso3f$lambda.min
+lasso3f <- glmnet(data.matrix(x), df_3$totalWordsCount, alpha = 1, lambda = best_lambda_3e)
+model_3f <- predict(ridge3f, newdata = data.frame(training), newx = data.matrix(x))
+EPE_3f <- sum((model_3f[700:1000] - testing3b)^2)/300
+
+
+#4a
+

@@ -1,0 +1,112 @@
+
+library(MASS)
+library(ggplot2)
+
+
+matrixval <- c(1,0,0,1)
+num = 50
+##################### 7A
+
+### TRAINING ###
+class_1 = mvrnorm(num, mu=c(0,0), Sigma=matrix(matrixval, 2))
+colnames(class_1) <- c("x1","x2")
+
+class_2 = mvrnorm(num, mu=c(5,5), Sigma=matrix(matrixval, 2))
+colnames(class_2) <- c("x1","x2")
+
+class_3 = mvrnorm(num, mu=c(10,10), Sigma=matrix(matrixval, 2))
+colnames(class_3) <- c("x1","x2")
+training = data.frame(x=append(append(class_1[,1], class_2[,1]), class_3[,1]), y=append(append(class_1[,2], class_2[,2]), class_3[,2]), actual=append(append(rep("1", 50), rep("2", 50)), rep("3", 50)))
+
+all_vals = cbind(all_x, all_y)
+
+
+### TESTING ####
+class_1 = mvrnorm(num, mu=c(0,0), Sigma=matrix(matrixval, 2))
+colnames(class_1) <- c("x1","x2")
+
+class_2 = mvrnorm(num, mu=c(5,5), Sigma=matrix(matrixval, 2))
+colnames(class_2) <- c("x1","x2")
+
+class_3 = mvrnorm(num, mu=c(10,10), Sigma=matrix(matrixval, 2))
+colnames(class_3) <- c("x1","x2")
+testing = data.frame(x=append(append(class_1[,1], class_2[,1]), class_3[,1]), y=append(append(class_1[,2], class_2[,2]), class_3[,2]), actual=append(append(rep("1", 50), rep("2", 50)), rep("3", 50)))
+
+all_vals = cbind(all_x, all_y)
+##################### 7B
+
+
+##################### 7C
+first <- training[training$actual == 1,]
+second <- training[training$actual == 2,]
+third <- training[training$actual == 3,]
+
+plot(first$x, first$y, col = "red", xlim = c(-5, 15), ylim = c(-15, 15), xlab = "x values", ylab = "y values")
+points(second$x, second$y, col = "blue")
+points(third$x, third$y, col = "green")
+
+library(klaR)
+partimat(all_vals ~ x + y, data = df_7a, method ="lda")
+mdl <- lda(training$actual ~ x + y, data = training)
+pred_mdl <- predict(mdl, testing[,-3])
+cm = as.matrix(table(Actual = training$actual, Predicted = pred_mdl$class))
+cm
+
+##############################################
+# df_7a <- create_dist(456)
+# model_7a <- lda(actual ~ x + y, data=df_7a)
+# datPred = data.frame(Class=predict(model_7a)$class,predict(model_7a)$x)
+# model_7a2 <- lda(datPred[,2:3], datPred[,1])
+# x <- seq(min(datPred[,2]), max(datPred[,2]), length.out=150)
+# y <- seq(min(datPred[,3]), max(datPred[,3]), length.out=150)
+# Xcon <- matrix(c(rep(x,length(y)), rep(y, rep(length(x), length(y)))),,2)
+# model_post1 <- predict(model_7a2, Xcon)$post[, c("1","2")] %% c(1,1)    #posterior probabilities of a point belonging to each class 
+# model_post2 <- predict(model_7a2, Xcon)$post[, c("2","3")] %% c(1,1)
+# pr<-data.frame(x=rep(x, length(y)), y=rep(y, each=length(x)), z1=as.vector(model_post1), z2=as.vector(model_post2))
+# 
+# ggplot(datPred, aes(x = LD1, y = LD2)) + geom_point(size=3, aes(pch=Class, col=Class)) + geom_contour(data=pr, aes(x=x, y=y, z=z1), breaks=c(0,.5)) + geom_contour(data=pr, aes(x=x, y=y, z=z2), breaks=c(0,.5))
+# 
+
+###################################### 8A
+first <- training[training$actual == 1,]
+second <- training[training$actual == 2,]
+third <- training[training$actual == 3,]
+
+plot(first$x, first$y, col = "red", xlim = c(-5, 15), ylim = c(-15, 15), xlab = "x values", ylab = "y values")
+points(second$x, second$y, col = "blue")
+points(third$x, third$y, col = "green")
+
+library(klaR)
+partimat(all_vals ~ x + y, data = df_7a, method ="lda")
+mdl <- qda(training$actual ~ x + y, data = testing)
+pred_mdl <- predict(mdl, testing[,-3])
+cm = as.matrix(table(Actual = training$actual, Predicted = pred_mdl$class))
+cm
+
+
+
+
+######################################### 7/8
+decisionplot <- function(model, data, class = NULL, ...) {
+  cl <- data[,class] 
+  data <- data[,1:2]
+  k <- length(unique(cl))
+  plot(data, col = as.integer(cl)+1L, pch = as.integer(cl)+1L, ...)
+  r <- sapply(data, range, na.rm = TRUE)
+  xs <- seq(r[1,1], r[2,1], length.out = 100)
+  ys <- seq(r[1,2], r[2,2], length.out = 100)
+  g <- cbind(rep(xs, each=100), rep(ys, time = 100))
+  colnames(g) <- colnames(r)
+  g <- as.data.frame(g)
+  p <- predict(model, g, type = "class")
+  p <- p$class
+  p <- as.factor(p)
+  points(g, col = as.integer(p)+1L, pch = ".")
+  z <- matrix(as.integer(p), nrow = 100, byrow = TRUE)
+  contour(xs, ys, z, add = TRUE, drawlabels = FALSE, lwd = 2, levels = (1:(k-1))+.5)
+}
+ldamodel <- lda(actual ~ x + y, data=training)
+decisionplot(ldamodel, training, class="actual")
+
+qdamodel <- qda(actual ~ x + y, data = training)
+decisionplot(qdamodel, training, class="actual")

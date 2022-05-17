@@ -1,0 +1,8 @@
+
+x <- rnorm(30, 0,1)
+err <- rnorm(30,0,1)
+gx <- exp(x)
+y <- gx + err
+fun <- function(x){exp(x)}
+plot(x, y)
+curve(fun, col = "blue", add = TRUE)W

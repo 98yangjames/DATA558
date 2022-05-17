@@ -1,0 +1,34 @@
+set.seed(100)
+
+train = cbind(train_x1, train_x2)
+test = cbind(test_x1, test_x2)
+
+test_acc_err <- c()
+train_acc_err <- c()
+
+for(i in 1:50)
+{
+  prc_test_pred <- knn(train = train, test=test, cl = train_color, k = i)
+  train_pred <- knn.cv(train = train, cl = train_color, k=i)
+  
+  test_err = 1 - get_percentage_of_matches(as.numeric(factor(prc_test_pred)), as.numeric(factor(test_color)))
+  train_err = 1 - get_percentage_of_matches(as.numeric(factor(train_pred)), as.numeric(factor(train_color)))
+  
+  test_acc_err <- append(test_acc_err, test_err)
+  train_acc_err <- append(train_acc_err, train_err)
+}
+
+k <- 1:50
+x <- 1/k
+
+
+
+# Training Data
+plot(x, train_acc_err, pch=19, col="purple", type="o", lty=1, ylim=c(0.0, 0.25), ylab="Classification Error (percent inccorect)", xlab="1/k", main="KNN Test & Train Error Vs. 1/k")
+
+# Testing Data
+points(x, test_acc_err, pch=15, col="orange")
+lines(x, test_acc_err, col="orange", lty=2)
+
+# Legend
+legend("topright", legend=c("test", "train"), col=c("purple", "orange"), pch=c(19,15))
