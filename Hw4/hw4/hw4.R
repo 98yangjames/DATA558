@@ -45,5 +45,27 @@ curve(fun, col = "blue", add = TRUE, lty="dashed")
 points(smoothing$x, smoothing$y, col = "green", lty = 1, type = "b")
 legend("topleft",legend=c("ghat(x)", "generating function"), col= c("green", "blue"), lty=1:2)
 
+#4
+data4a <- read.csv("dataset-37830.csv")
+trainingAge <- data4a$age[0:2800]
+trainingWage <- data4a$wage[0:2800]
+testingAge <- data4a$age[2801:3000]
+testingWage <- data4a$wage[2801:3000]
+
+testing <- data.frame(t(rbind(testingAge, testingWage)))
+
 #4a
-data4a <- Wage
+tasq = trainingAge^2
+vals4a <- lm(trainingWage ~ trainingAge + tasq)
+#model
+fun4a <- function(x) {
+  return(-0.05321429*x^2 + 5.31585967*x -10.87610589)
+}
+plot(trainingAge, trainingWage)
+curve(fun4a, col = "blue", add = TRUE, lty = "dashed", lwd = 3)
+legend("topleft",legend=c("fit"), col= c( "blue"), lty=2)
+
+#4b
+model_4b <- step(vals4a)
+model_4b_predict <- predict(model_4b, newdata = testing)
+  
