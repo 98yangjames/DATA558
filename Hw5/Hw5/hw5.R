@@ -65,5 +65,23 @@ predict_vals <- table(predict = model_4c, truth = model_4a.test$Purchase)
 testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
 
 model_4c <- predict(model_4b, newdata = model_4a.train)
-predict_vals <- table(predict = model_4c, truth = model_4a.train)
+predict_vals <- table(predict = model_4c, truth = model_4a.train$Purchase)
 training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
+
+#4d
+tune.out <- tune(svm, Purchase ~ ., data = model_4a.train, kernel = "linear", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10)))
+summary(tune.out)
+
+#4e
+model_4b <- svm(Purchase ~ ., cost= 1, data = model_4a.train, kernel = "linear")
+model_4e <- predict(model_4b, newdata = model_4a.test)
+predict_vals <- table(predict = model_4e, truth = model_4a.test$Purchase)
+testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
+
+model_4e <- predict(model_4b, newdata = model_4a.train)
+predict_vals <- table(predict = model_4e, truth = model_4a.train$Purchase)
+training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
+
+#4f
+
+        
