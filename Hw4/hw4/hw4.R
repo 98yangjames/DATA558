@@ -182,7 +182,8 @@ model_5a <- select(Auto, -name)
 High <- factor(ifelse(Auto$mpg <= 23.5, "No", "Yes"))
 model_5a <- data.frame(model_5a, High)
 
-train <- sample(1:nrow(Auto), 200)
+train <- sample(1:nrow(Auto), 300)
+model_5a.train <- head(model_5a, 300)
 model_5a.test <- model_5a[-train, ]
 High.test <- High[-train]
 
@@ -209,8 +210,13 @@ yhat <- predict(tree.model_5a, newdata = model_5a.test)
 MSE5a <- mean((yhat - model_5a.test$mpg)^2)
 
 #5b
+library(ipred) 
+bag <- bagging(formula = model_5a.train$mpg ~ ., data = model_5a.train, nbag = 150, coob = TRUE)
+bag.model_5b <- predict(bag, newdata = model_5a.test)
+MSE5b <- mean((bag.model_5b - model_5a.test$mpg)^2)
+#5c
 library(randomForest)
-train <- sample(1:nrow(Auto), 200)
+train <- sample(1:nrow(Auto), 300)
 model_5a.test <- model_5a[-train, ]
 model_5a.test <- model_5a.test[-c(2, 8,9) ]
 set.seed(1)
@@ -221,12 +227,12 @@ yhat.bag <- predict(bag.model_5a, newdata = model_5a.test)
 MSE <- mean((yhat.bag - model_5a.test$mpg)^2)
 
 
-#5c
-#just change 5b to Sqrt(p) where p is the number of predictors.
-
 #5d
+model_5a.train <- head(Auto, 300)
+model_5a.test <- model_5a[-train, ]
+model_5a.test <- model_5a.test[-c(2, 8,9) ]
 library(gam)
-gam.model_5a <- gam(mpg ~ s(displacement,4) + s(horsepower, 4) + s(weight,4) + s(acceleration,4) + s(year,4), data = Auto)
+gam.model_5a <- gam(mpg ~ s(displacement,4) + s(horsepower, 4) + s(weight,4) + s(acceleration,4) + s(year,4), data = model_5a.train)
 plot.Gam(gam.model_5a)
 gam.predict <- predict(gam.model_5a, newdata =model_5a.test)
 MSE5d <- mean((gam.predict - model_5a.test$mpg)^2)
