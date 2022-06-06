@@ -83,5 +83,53 @@ predict_vals <- table(predict = model_4e, truth = model_4a.train$Purchase)
 training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
 
 #4f
+model_4f <- svm(Purchase ~ ., cost= 0.01, data = model_4a.train, kernel = "radial")
+summary(model_4f)
 
-        
+model_4f_predict <- predict(model_4f, newdata = model_4a.test)
+predict_vals <- table(predict = model_4f_predict, truth = model_4a.test$Purchase)
+testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
+
+model_4f_predict <- predict(model_4f, newdata = model_4a.train)
+predict_vals <- table(predict = model_4f_predict, truth = model_4a.train$Purchase)
+training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
+
+tune.out <- tune(svm, Purchase ~ ., data = model_4a.train, kernel = "radial", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10)))
+summary(tune.out)
+
+model_4f <- svm(Purchase ~ ., cost= 1, data = model_4a.train, kernel = "radial")
+summary(model_4f)
+
+model_4f_predict <- predict(model_4f, newdata = model_4a.test)
+predict_vals <- table(predict = model_4f_predict, truth = model_4a.test$Purchase)
+testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
+
+model_4f_predict <- predict(model_4f, newdata = model_4a.train)
+predict_vals <- table(predict = model_4f_predict, truth = model_4a.train$Purchase)
+training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
+
+#4g
+model_4g <- svm(Purchase ~ ., cost= 0.01, data = model_4a.train, kernel = "polynomial", degree = 2)
+summary(model_4g)
+
+model_4g_predict <- predict(model_4g, newdata = model_4a.test)
+predict_vals <- table(predict = model_4g_predict, truth = model_4a.test$Purchase)
+testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
+
+model_4g_predict <- predict(model_4g, newdata = model_4a.train)
+predict_vals <- table(predict = model_4g_predict, truth = model_4a.train$Purchase)
+training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
+
+tune.out <- tune(svm, Purchase ~ ., data = model_4a.train, kernel = "polynomial", degree = 2, ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10)))
+summary(tune.out)
+
+model_4g <- svm(Purchase ~ ., cost= 10, data = model_4a.train, kernel = "polynomial", degree = 2)
+summary(model_4g)
+
+model_4g_predict <- predict(model_4g, newdata = model_4a.test)
+predict_vals <- table(predict = model_4g_predict, truth = model_4a.test$Purchase)
+testing_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.test$Purchase))
+
+model_4g_predict <- predict(model_4g, newdata = model_4a.train)
+predict_vals <- table(predict = model_4g_predict, truth = model_4a.train$Purchase)
+training_error <- 1 - (sum(diag(predict_vals)) / length(model_4a.train$Purchase))
